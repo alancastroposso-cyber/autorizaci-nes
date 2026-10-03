@@ -1,0 +1,17 @@
+/* Tablero de solo lectura (pantalla / TV) */
+body.tablero main { max-width: none; }
+body.tablero .tarjeta { cursor: default; }
+.tablero-cuerpo { display: grid; grid-template-columns: 3fr 1fr; gap: 16px; margin-top: 16px; }
+.panel h2 { font-size: 16px; margin: 0 0 8px; }
+.panel h2 span { font-weight: 400; color: var(--suave); font-size: 14px; }
+#pendientes th { text-align: left; font-size: 12px; text-transform: uppercase; color: var(--suave); padding: 9px 10px; border-bottom: 1px solid var(--borde); background: #fafbfc; }
+#pendientes td { padding: 9px 10px; border-bottom: 1px solid var(--borde); }
+#pendientes tr.urgente td:first-child { box-shadow: inset 4px 0 var(--rojo); }
+#pendientes tr.prevenir td:first-child { box-shadow: inset 4px 0 var(--amarillo); }
+#pendientes tr.tramite td:first-child { box-shadow: inset 4px 0 var(--azul); }
+#pendientes tr.urgente td:nth-child(5) { color: var(--rojo); font-weight: 600; }
+#por-eps { background: var(--panel); border: 1px solid var(--borde); border-radius: 8px; padding: 12px; display: grid; gap: 10px; }
+.barra-eps { display: grid; grid-template-columns: 1fr 2fr auto; gap: 8px; align-items: center; font-size: 13px; }
+.barra-eps div { background: var(--gris-f); border-radius: 4px; height: 12px; overflow: hidden; }
+.barra-eps i { display: block; height: 100%; background: var(--rojo); border-radius: 4px; }
+@media (max-width: 900px) { .tablero-cuerpo { grid-template-columns: 1fr; } }

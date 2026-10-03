@@ -1,0 +1,129 @@
+ESTADO DE AUTORIZACIONES  -  Guía de instalación y uso
+=====================================================
+
+¿CÓMO FUNCIONA?
+---------------
+  - Un solo computador hace de SERVIDOR: tiene XAMPP encendido (Apache + MySQL).
+  - Apache muestra la aplicación (los archivos .php de esta carpeta).
+  - MySQL guarda los datos: ingresos, usuarios e historial de cambios.
+  - Los demás computadores NO instalan nada: abren el navegador (Chrome/Edge)
+    y escriben la dirección del servidor. Todas ven la misma información.
+
+     [PC Admisión]   [PC Autorizadora]   [PC Facturación]
+            \               |                 /
+             \______ red de la institución __/
+                            |
+                  [PC SERVIDOR con XAMPP]
+                   Apache  +  MySQL (datos)
+
+
+INSTALACIÓN (una sola vez, en el PC servidor)
+---------------------------------------------
+  1. Copie esta carpeta completa a:   C:\xampp\htdocs\autorizaciones
+  2. Abra el "XAMPP Control Panel" y presione Start en Apache y en MySQL.
+  3. En ese mismo PC abra:  http://localhost/autorizaciones
+     La primera vez se crean solas la base de datos (estado_autorizaciones)
+     y las tablas.
+  4. Ingrese con   usuario: admin    contraseña: admin
+     El sistema le obliga a crear una contraseña nueva. GUÁRDELA BIEN.
+  5. Menú "Usuarios" -> "+ Nuevo usuario" para crear a cada persona.
+
+  Si MySQL de XAMPP tiene contraseña para root, escríbala en config.php ($DB_PASS).
+
+
+ACCESO DESDE LOS OTROS COMPUTADORES
+-----------------------------------
+  1. En el PC servidor, abra "cmd" y escriba:  ipconfig
+     Anote la "Dirección IPv4", por ejemplo 192.168.1.50
+  2. En los demás PCs abra:   http://192.168.1.50/autorizaciones
+     (Cree un acceso directo en el escritorio de cada uno.)
+  3. Si no abre: en el PC servidor, Firewall de Windows -> permitir
+     "Apache HTTP Server" en redes privadas.
+  Recomendado: pedir a sistemas que le dejen IP FIJA al PC servidor,
+  para que la dirección no cambie.
+
+  Para que funcione siempre, el PC servidor debe estar encendido con
+  Apache y MySQL corriendo. En XAMPP Control Panel -> Config se puede
+  marcar que Apache y MySQL arranquen solos.
+
+
+USUARIOS Y PERMISOS
+-------------------
+  - Cada persona tiene su usuario y contraseña. Todo cambio queda registrado
+    con su nombre en el "Historial de cambios" de cada ingreso.
+  - Todos pueden VER toda la información. Cada usuario solo puede MODIFICAR
+    las secciones que el administrador le marque:
+        Admisionadora / Autorizadora de urgencias / Autorizadora / Facturadora
+  - Solo quien tiene la sección "Admisionadora" puede crear ingresos nuevos.
+  - RESPONSABLE DEL INGRESO: es quien lo registra. Su nombre aparece en la
+    lista, en las alertas y en el tablero. En los ingresos que ella registró
+    puede llenar también las autorizaciones (urgencias, observación/
+    hospitalización, prórrogas y egreso) aunque no tenga esas secciones;
+    facturación sigue siendo solo de facturación. Sus ingresos se marcan "Tuyo".
+  - Cuando se registra la autorización que faltaba, el ingreso sale solo de
+    las alertas y del tablero.
+  - Cargo "Consulta" = solo puede mirar (ej. coordinación, auditoría).
+  - Contraseñas: mínimo 8 caracteres, con letras y números. Al primer ingreso
+    (y cuando el admin la restablece) el sistema pide cambiarla.
+  - 5 intentos fallidos bloquean el usuario 10 minutos.
+  - La sesión se cierra sola tras 3 horas sin uso.
+  - Si alguien se retira: "Desactivar" (no se borra, su historial se conserva).
+
+
+TABLERO PARA TODOS LOS FUNCIONARIOS (solo lectura)
+--------------------------------------------------
+  http://IP-DEL-SERVIDOR/autorizaciones/tablero.php
+  - No pide usuario y no permite modificar nada. Sirve para dejarlo en una
+    pantalla o TV; se actualiza solo cada 30 segundos.
+  - Muestra el nombre de la responsable de cada ingreso pendiente.
+  - Muestra cuántos ingresos hay en cada estado, la lista de ingresos que
+    necesitan autorización de la EPS y los pendientes por EPS.
+  - Por privacidad muestra el nombre del paciente abreviado (ej. "ANA M. P. G.").
+  - Si prefiere que pida usuario: en config.php ponga  $TABLERO_PUBLICO = false;
+
+
+ALERTAS DE AUTORIZACIONES PENDIENTES
+------------------------------------
+  Al entrar a la app, arriba aparece un recuadro rojo con los ingresos que
+  necesitan una autorización de la EPS y qué falta en cada uno:
+    - Falta la autorización inicial
+    - Pedir autorización de observación u hospitalización (urgencia >8 h)
+    - Pedir prórroga (la autorización venció)
+    - Pedir autorización de egreso
+    - Por vencer (amarillo): ir pidiendo la prórroga / hospitalización
+  - La pestaña del navegador muestra el número de pendientes, ej. "(3) ⚠".
+  - Cuando entra un pendiente nuevo suena un aviso (se puede apagar con
+    el botón 🔔). El navegador solo deja sonar si la página ya se usó/clicó
+    una vez, así que conviene tener la app abierta todo el turno.
+  - Cuando la autorizadora envía la solicitud a la EPS, presiona
+    "Marcar solicitada": el ingreso pasa a azul ("en trámite") con su nombre
+    y la hora, así las compañeras saben que ya se pidió. Si el ingreso pasa
+    a otra situación (ej. de urgencias a hospitalización), vuelve a rojo.
+  - Pueden marcar: quien tiene la sección Urgencias o Autorizadora, y la
+    responsable del ingreso.
+
+
+ESTADOS (del más urgente al menos urgente)
+------------------------------------------
+  Sin autorización inicial ........ no tiene número de autorización de admisión
+  Urgencia >8 h ................... la autorización de urgencias (8 horas) venció
+                                    y no hay autorización de observación u
+                                    hospitalización
+  Autorización vencida ............ paciente sin egreso y la última fecha de
+                                    expiración (estancia o prórroga) ya pasó
+  Egresó sin autorización de egreso  tiene fecha de egreso y no autorización de egreso
+  Por vencer ...................... a la urgencia le quedan 2 horas o menos, o la
+                                    estancia/prórroga vence hoy o mañana
+  Listo para facturar ............. tiene autorización de egreso y no tiene factura
+  Autorizado / al día ............. todo en orden
+  Facturado ....................... tiene número de factura
+
+  Vigencias (se cambian al inicio de reglas.php):
+    Urgencias 8 horas · Hospitalización 3 días (la fecha de expiración se
+    calcula sola; cada prórroga propone 3 días más).
+
+
+COPIAS DE SEGURIDAD
+-------------------
+  http://localhost/phpmyadmin -> base "estado_autorizaciones" -> Exportar -> Continuar.
+  Hágalo al menos una vez por semana y guarde el archivo fuera del servidor.
